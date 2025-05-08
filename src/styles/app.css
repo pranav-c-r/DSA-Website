@@ -1,0 +1,180 @@
+:root {
+    --primary: #6B46C1;
+    --primary-light: #9F7AEA;
+    --primary-lighter: #E9D8FD;
+    --secondary: #38B2AC;
+    --secondary-light: #81E6D9;
+    --background: #1A202C;
+    --background-light: #2D3748;
+    --text: #E2E8F0;
+    --text-light: #F7FAFC;
+    --highlight: #F687B3;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+  }
+  
+  .visualizer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .app-title {
+    text-align: center;
+    color: var(--primary-light);
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
+  }
+  
+  .tree-container {
+    background-color: var(--background-light);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  .tree-svg {
+    background-color: var(--background-light);
+    border-radius: 4px;
+  }
+  
+  .controls-container {
+    background-color: var(--background-light);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  .control-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .control-input {
+    padding: 12px;
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    background-color: var(--background);
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  .control-input:focus {
+    border-color: var(--primary-light);
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .control-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    flex-grow: 1;
+  }
+  
+  .control-button.insert {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .control-button.insert:hover {
+    background-color: var(--primary-light);
+  }
+  
+  .control-button.delete {
+    background-color: #E53E3E;
+    color: white;
+  }
+  
+  .control-button.delete:hover {
+    background-color: #F56565;
+  }
+  
+  .control-button.random {
+    background-color: var(--secondary);
+    color: white;
+  }
+  
+  .control-button.random:hover {
+    background-color: var(--secondary-light);
+  }
+  
+  .control-button.clear {
+    background-color: #718096;
+    color: white;
+  }
+  
+  .control-button.clear:hover {
+    background-color: #A0AEC0;
+  }
+  
+  .legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .legend-line {
+    width: 30px;
+    height: 2px;
+    margin: 0 5px;
+  }
+  
+  .tree-node.highlighted circle {
+    fill: var(--highlight);
+    stroke: #F687B3;
+    animation: pulse 1s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { r: 25; }
+    50% { r: 28; }
+    100% { r: 25; }
+  }
+  
+  @media (max-width: 768px) {
+    .button-group {
+      flex-direction: column;
+    }
+    
+    .control-button {
+      width: 100%;
+    }
+  }
