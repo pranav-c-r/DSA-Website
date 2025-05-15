@@ -5,12 +5,16 @@ import { FaHome } from 'react-icons/fa'
 import './App.css'
 import './components/LinkedListPage.css'
 import './styles/Sorting.css'
+import './styles/TreeVisualizer.css'
+import './styles/Pathfinding.css'
 import CodeViewer from './components/CodeViewer'
 import LinkedListVisualizer from './components/LinkedListVisualizer'
 import DiySection from './components/DiySection'
 import DoublyLinkedListExplanation from './components/DoublyLinkedListExplanation'
 import HomePage from './components/HomePage'
 import SortingVisualizer from './components/SortingVisualizer'
+import TreeVisualizer from './components/TreeVisualizer'
+import PathfindingVisualizer from './components/PathfindingVisualizer/PathfindingVisualizer'
 import { generateCppCode } from './utils/codeGenerator'
 
 // Create a wrapper component to handle LinkedList page state
@@ -150,6 +154,8 @@ function App() {
           }
         />
         <Route path="/sorting" element={<SortingVisualizer />} />
+        <Route path="/trees" element={<TreeVisualizer />} />
+        <Route path="/graphs" element={<PathfindingVisualizer />} />
         <Route path="/index.html" element={<Navigate replace to="/" />} />
       </Routes>
     </Router>

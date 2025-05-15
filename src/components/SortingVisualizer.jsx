@@ -1180,7 +1180,7 @@ const SortingVisualizer = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                   >
-                    {["Bubble Sort", "Selection Sort", "Insertion Sort", "Merge Sort", "Quick Sort", "Heap Sort", "Counting Sort"].map(algo => (
+                    {["Bubble Sort", "Selection Sort", "Merge Sort", "Quick Sort", "Heap Sort"].map(algo => (
                       <button 
                         key={algo}
                         className={method === algo ? 'active' : ''}
