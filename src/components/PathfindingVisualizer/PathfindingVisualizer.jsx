@@ -43,6 +43,8 @@ class PathfindingVisualizer extends Component {
       shortestPath: 0,
       number_of_nodes: 0,
       showModal: true,
+      currentStep: "", // Added to show current operation
+      animationSpeed: 200, // Added for controlling animation speed
       algo_info: {
         "Algorithms": {
           text: "",
@@ -65,15 +67,38 @@ class PathfindingVisualizer extends Component {
   makeGrid = () => {
     if (this.animating) return;
     
+    // Update status message
+    this.setState({
+      currentStep: "Resetting grid..."
+    });
+    
     // Limit grid size to be more manageable and prevent performance issues
     let row_size = Math.min(Math.floor((window.innerHeight - 200) / 45), 15);
-    let col_size = Math.min(Math.floor((window.innerWidth - 100) / 45), 20); 
+    let col_size = Math.min(Math.floor((window.innerWidth - 100) / 45), 35); // Increased max columns
     
     // Ensure we have at least minimum grid size
     row_size = Math.max(row_size, 8);
-    col_size = Math.max(col_size, 12);
+    col_size = Math.max(col_size, 20); // Increased minimum columns
     
     console.log(`Creating grid of size ${row_size} x ${col_size}`);
+    
+    // Completely clean up the existing grid to prevent persistence issues
+    if (this.state.grid && this.state.grid.length > 0) {
+      for (let i = 0; i < this.state.grid.length; i++) {
+        for (let j = 0; j < this.state.grid[i].length; j++) {
+          const nodeId = `node-${i}-${j}`;
+          const nodeElement = document.getElementById(nodeId);
+          if (nodeElement) {
+            // Reset class
+            nodeElement.className = "node_";
+            
+            // Remove all images within the node to ensure complete cleanup
+            const images = nodeElement.querySelectorAll('img');
+            images.forEach(img => img.remove());
+          }
+        }
+      }
+    }
     
     let arr = [];
     
@@ -144,71 +169,128 @@ class PathfindingVisualizer extends Component {
   handleMouseDown = (row, col) => {
     if (this.animating) return;
     
-    let arr = this.state.grid;
+    // Create a deep copy of the grid for reliable state updates
+    let arr = JSON.parse(JSON.stringify(this.state.grid));
+    
     if (arr[row][col].isStart) {
+      // Clear the current start node immediately to prevent duplicates
+      const [startRow, startCol] = this.state.start_node;
+      arr[startRow][startCol].isStart = false;
+      
       this.setState({
-        mainClicked: "start"
+        mainClicked: "start",
+        mouseClicked: true,
+        currentStep: "Moving start node..."
       });
     } else if (arr[row][col].isEnd) {
+      // Clear the current end node immediately to prevent duplicates
+      const [endRow, endCol] = this.state.end_node;
+      arr[endRow][endCol].isEnd = false;
+      
       this.setState({
-        mainClicked: "end"
+        mainClicked: "end",
+        mouseClicked: true,
+        currentStep: "Moving end node..."
       });
     } else if (!arr[row][col].isWall && !arr[row][col].isStart && !arr[row][col].isEnd) {
+      // Create a wall
       arr[row][col].isWall = true;
+      
+      this.setState({
+        grid: arr,
+        mouseClicked: true,
+        currentStep: `Adding wall at (${row}, ${col})`
+      });
     } else if (arr[row][col].isWall) {
+      // Remove wall
       arr[row][col].isWall = false;
+      
+      this.setState({
+        grid: arr,
+        mouseClicked: true,
+        currentStep: `Removing wall at (${row}, ${col})`
+      });
+    } else {
+      // Just mark as clicked for other cases
+      this.setState({
+        mouseClicked: true
+      });
     }
-    
-    this.setState({
-      grid: arr,
-      mouseClicked: true
-    });
   };
   
   handleMouseEnter = (row, col) => {
     if (this.animating) return;
     
     if (this.state.mouseClicked) {
-      let arr = this.state.grid;
+      // Create a deep copy of the grid for reliable state updates
+      let arr = JSON.parse(JSON.stringify(this.state.grid));
+      
       if (this.state.mainClicked === "start") {
         // Don't allow start point to overlap with end point
         if (arr[row][col].isEnd) return;
         
-        arr[row][col].isStart = true;
-        this.setState({
-          start_node: [row, col]
-        });
+        // Check if we're entering a new node
+        if (this.state.start_node && 
+            (this.state.start_node[0] !== row || this.state.start_node[1] !== col)) {
+          
+          // Clear the old start node
+          const [prevRow, prevCol] = this.state.start_node;
+          arr[prevRow][prevCol].isStart = false;
+          
+          // Set the new start node
+          arr[row][col].isStart = true;
+          
+          this.setState({
+            grid: arr,
+            start_node: [row, col],
+            currentStep: `Set start at (${row}, ${col})`
+          });
+        }
       } else if (this.state.mainClicked === "end") {
         // Don't allow end point to overlap with start point
         if (arr[row][col].isStart) return;
         
-        arr[row][col].isEnd = true;
-        this.setState({
-          end_node: [row, col]
-        });
+        // Check if we're entering a new node
+        if (this.state.end_node && 
+            (this.state.end_node[0] !== row || this.state.end_node[1] !== col)) {
+          
+          // Clear the old end node
+          const [prevRow, prevCol] = this.state.end_node;
+          arr[prevRow][prevCol].isEnd = false;
+          
+          // Set the new end node
+          arr[row][col].isEnd = true;
+          
+          this.setState({
+            grid: arr,
+            end_node: [row, col],
+            currentStep: `Set end at (${row}, ${col})`
+          });
+        }
       } else if (!arr[row][col].isWall && !arr[row][col].isStart && !arr[row][col].isEnd) {
+        // Create a wall
         arr[row][col].isWall = true;
+        
+        this.setState({
+          grid: arr,
+          currentStep: `Adding wall at (${row}, ${col})`
+        });
       } else if (arr[row][col].isWall) {
+        // Remove wall
         arr[row][col].isWall = false;
+        
+        this.setState({
+          grid: arr,
+          currentStep: `Removing wall at (${row}, ${col})`
+        });
       }
-      
-      this.setState({
-        grid: arr
-      });
     }
   };
   
   handleMouseLeave = (row, col) => {
-    if (this.animating) return;
-    
-    let arr = this.state.grid;
-    if (this.state.mainClicked !== "") {
-      arr[row][col].isStart = false;
-      arr[row][col].isEnd = false;
-      this.setState({
-        grid: arr
-      });
-    }
+    // No special handling needed - our useEffect-based approach in the Node component
+    // will automatically update the DOM when state changes
+    return;
   };
   
   handleMouseUp = () => {
@@ -283,13 +365,15 @@ class PathfindingVisualizer extends Component {
       // Animate visited nodes
       const animateVisited = () => {
         if (i === visited_nodes.length) {
+          this.setState({ currentStep: "Finding shortest path..." });
           requestAnimationFrame(animatePath);
           return;
         }
         
         arr[visited_nodes[i].row][visited_nodes[i].col].isVisited = true;
         this.setState({
-          grid: arr
+          grid: arr,
+          currentStep: `Exploring node (${visited_nodes[i].row}, ${visited_nodes[i].col})`
         });
         
         if (!arr[visited_nodes[i].row][visited_nodes[i].col].isStart && !arr[visited_nodes[i].row][visited_nodes[i].col].isEnd) {
@@ -309,9 +393,17 @@ class PathfindingVisualizer extends Component {
           this.setState({
             grid: arr,
             visited: visited_nodes.length,
-            shortestPath: shortestPath.length
+            shortestPath: shortestPath.length,
+            currentStep: "Path found! 🎉"
           });
           this.animating = false;
+          
+          // Clear the success message after 2 seconds
+          setTimeout(() => {
+            if (!this.animating) {
+              this.setState({ currentStep: "" });
+            }
+          }, 2000);
           return;
         }
         
@@ -454,31 +546,57 @@ class PathfindingVisualizer extends Component {
           </div>
         </header>
         
-        {/* Stats Display */}
+        {/* Stats and Status Display */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
           padding: '10px', 
           backgroundColor: 'rgba(26, 26, 46, 0.7)',
-          borderBottom: '1px solid #5bc9b1' 
+          borderBottom: '1px solid #5bc9b1',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>
-          <div style={{ margin: '0 20px', textAlign: 'center' }}>
-            <p style={{ margin: '0', color: 'white' }}>
-              Visited Nodes: <span style={{ color: '#f3c623', fontWeight: 'bold' }}>{this.state.visited}</span>
-            </p>
-            <div className="progress2 progress-moved" style={{ width: '150px' }}>
-              <div className="progress-bar2" style={{ width: `${(this.state.visited / this.state.number_of_nodes) * 100}%` }}></div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+            marginBottom: '10px'
+          }}>
+            <div style={{ margin: '0 20px', textAlign: 'center' }}>
+              <p style={{ margin: '0', color: 'white' }}>
+                Visited Nodes: <span style={{ color: '#f3c623', fontWeight: 'bold' }}>{this.state.visited}</span>
+              </p>
+              <div className="progress2 progress-moved" style={{ width: '150px' }}>
+                <div className="progress-bar2" style={{ width: `${(this.state.visited / this.state.number_of_nodes) * 100}%` }}></div>
+              </div>
+            </div>
+            
+            <div style={{ margin: '0 20px', textAlign: 'center' }}>
+              <p style={{ margin: '0', color: 'white' }}>
+                Shortest Path: <span style={{ color: '#f3c623', fontWeight: 'bold' }}>{this.state.shortestPath}</span>
+              </p>
+              <div className="progress2 progress-moved" style={{ width: '150px' }}>
+                <div className="progress-bar2" style={{ width: `${(this.state.shortestPath / this.state.number_of_nodes) * 100}%` }}></div>
+              </div>
             </div>
           </div>
-          
-          <div style={{ margin: '0 20px', textAlign: 'center' }}>
-            <p style={{ margin: '0', color: 'white' }}>
-              Shortest Path: <span style={{ color: '#f3c623', fontWeight: 'bold' }}>{this.state.shortestPath}</span>
-            </p>
-            <div className="progress2 progress-moved" style={{ width: '150px' }}>
-              <div className="progress-bar2" style={{ width: `${(this.state.shortestPath / this.state.number_of_nodes) * 100}%` }}></div>
+
+          {/* Current Operation Display */}
+          {this.state.currentStep && (
+            <div style={{
+              backgroundColor: '#1a1a2e',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              color: '#5bc9b1',
+              border: '1px solid #5bc9b1',
+              marginTop: '10px',
+              fontSize: '0.9rem',
+              maxWidth: '80%',
+              textAlign: 'center'
+            }}>
+              {this.state.currentStep}
             </div>
-          </div>
+          )}
         </div>
         
         <div id="error" className="alert alert-danger" style={{ 
