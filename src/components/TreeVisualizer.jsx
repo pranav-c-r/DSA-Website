@@ -1260,7 +1260,7 @@ function deleteNode(root, value) {
   if (node.children && node.children[1]) {
     inOrder(node.children[1]);
   }
-}`;
+}`,
       "Pre-Order":
         `function preOrder(node) {
   if (node === null) return;
@@ -1319,9 +1319,8 @@ function deleteNode(root, value) {
   }
 }`
   };
-        return codes[op];
-    
-  };
+  return codes[op];
+};
   
   return (
     
